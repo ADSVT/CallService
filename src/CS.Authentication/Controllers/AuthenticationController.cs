@@ -1,4 +1,5 @@
 ﻿using CS.Authentication.Contracts.Requests;
+using CS.Authentication.Contracts.Responses;
 using CS.Authentication.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,6 +21,13 @@ namespace CS.Authentication.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(UserLoginRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new AuthenticationResponse
+                {
+                    Errors = ModelState.Values.SelectMany(x => x.Errors.Select(y => y.ErrorMessage))
+                });
+            }
             var result = await _identityService.LoginAsync(request);
 
             return BadRequest("Invalid login or password");
@@ -36,6 +44,13 @@ namespace CS.Authentication.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserRegistrationRequest userModel)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new AuthenticationResponse
+                {
+                    Errors = ModelState.Values.SelectMany(x => x.Errors.Select(y => y.ErrorMessage))
+                });
+            }
             var authResponse = await _identityService.RegisterAsync(userModel);
             if(!authResponse.Success)
             {
